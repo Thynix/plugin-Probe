@@ -1,0 +1,33 @@
+group = 'com.asksteved'
+version = '0'
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.pterodactylus.net/" }
+}
+
+apply plugin: 'java'
+defaultTasks 'jar', 'test'
+sourceSets.main.java.srcDirs = ['src/']
+sourceSets.test.java.srcDirs = ['test/']
+sourceCompatibility = targetCompatibility = 8
+tasks.withType(JavaCompile).configureEach { options.encoding = "UTF-8" }
+javadoc.enabled = false
+
+dependencies {
+    compileJava group: 'org.freenetproject', name: 'fred', version: '0.7.5.1497'
+}
+
+tasks.register('fatJar', Jar) {
+    archiveFileName = project.name.toLowerCase() + '-jar-with-dependencies.jar'
+    from { (configurations.runtime - configurations.provided).collect { it.isDirectory() ? it : zipTree(it) } }
+    manifest {
+        attributes('Plugin-Main-Class': 'com.asksteved.probe.ProbePlugin')
+    }
+    with jar
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
